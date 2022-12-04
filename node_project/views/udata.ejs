@@ -1,0 +1,32 @@
+<%- include ('head'); -%>
+
+
+<div>
+    <center><h2 class="text-primary">Data about <%= lastName; %></h2></center>
+</div>
+
+<dl>
+    <dt>
+        <%= firstName; %>
+    </dt>
+    <dt>
+        <%= lastName; %>
+    </dt>
+    <dt>
+        <%= email; %>
+    </dt>
+    <dt>
+        <img src="<%= image; %>" width="400">
+    </dt>
+</dl></br>
+
+<div class="LinkTable"><a href="/users">To users list</a>
+</div><br/>
+
+<div class="LinkTable"><a href="/users/<%= id; %>/edit">Edit</a>
+</div>
+
+<div class="LinkTable"><a href="/users/<%= id; %>/delete">Delete</a>
+</div>
+
+<%- include ('foot'); -%>

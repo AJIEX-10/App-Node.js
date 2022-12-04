@@ -1,0 +1,27 @@
+<%- include ('head'); -%>
+
+<div>
+    <center><h2 class="text-info">Edit User</h2></center>
+</div>
+<div class="form-group">
+    <form id="form" method="post" action="/users/<%= id; %>/edit">
+        <label for="name">Name</label>
+        <input type="text" name="firstName" value="<%= firstName; %>" required class="form-control"><br/>
+
+        <label for="surname">Surname</label>
+        <input type="text" name="lastName" value="<%= lastName; %>" required class="form-control"><br/>
+
+        <label for="mail">Email</label>
+        <input type="text" name="email" pattern="^(([0-9A-Za-z]{1}[\-0-9A-z\.]{1,}[0-9A-Za-z]{1})@([\-A-Za-z]{1,}\.){1,2}[\-A-Za-z]{2,})$" value="<%= email; %>" required class="form-control"><br/>
+
+        <label for="image">Image</label>
+        <input type="text" name="image" value="<%= image; %>" class="form-control" required pattern="^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+(?:png|jpg|jpeg|gif|svg)+$"><br/>
+        
+        <input type="submit" value="Edit" class="btn btn-warning"><br/>
+    </form>
+</div><br/><br/>
+
+<div class="LinkTable"><a href="/users">To users list</a>
+</div>
+
+<%- include ('foot'); -%>
