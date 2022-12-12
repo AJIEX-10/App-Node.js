@@ -3,9 +3,11 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const us_crud = require('./db').User_crud;
-const for_pdf = require('./db').For_pdf;
 const read = require('node-readability');
 const { jsPDF } = require("jspdf");
+const SQLGrid = require('@internalfx/sqlgrid');
+const fs = require('fs');
+const { Sequelize } = require('sequelize');
 app.set('port', process.env.PORT || 3001);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,42 +21,51 @@ app.post('/', function (req, res, next) {
     if (!req.body)
         return res.sendStatus(400);
     us_crud.create({ email: req.body.email, firstName: req.body.firstName, lastName: req.body.lastName, image: req.body.image }, (err) => {
+        if (err && err.message.includes('SQLITE_CONSTRAINT'))
+            return next('This email already exists');
         if (err)
             return next(err);
-        res.format({
-            json: () => {
-                res.send('ok');
-            }
-        });
+        res.redirect('/users');
     });
 });
 //@GENERATE PDF
 app.get('/users/pdf', function (req, res) {
     res.render('genpdf.ejs');
 });
-const textToBinary = (str = '') => {
-    let res = '';
-    res = str.split('').map(char => {
-        return char.charCodeAt(0).toString(2);
-    }).join(' ');
-    return res;
-};
 app.post('/users/pdf', function (req, res, next) {
     if (!req.body)
         return res.sendStatus(400);
     const email = req.body.email;
-    for_pdf.get_by_email(email, (err, users) => {
+    us_crud.get_by_email(email, (err, users) => {
         if (err)
             return next(err);
         const doc = new jsPDF();
-        for_pdf.add_pdf(email, doc.text(JSON.stringify(users), 10, 10), (err) => {
-            if (err)
-                return next(err);
-            res.format({
-                json: () => {
-                    res.send('true');
-                }
-            });
+        const data = JSON.stringify(users).split(',').join('\n');
+        doc.text(data, 10, 10);
+        doc.save('file.pdf');
+        const sequelize = new Sequelize({
+            dialect: 'sqlite',
+            storage: 'later.sqlite'
+        });
+        const bucket = SQLGrid(sequelize);
+        bucket.initBucket().then(function () {
+            try {
+                const fileBuffer = fs.readFileSync('file.pdf');
+                const newFile = bucket.writeFile({ filename: 'file.pdf', buffer: fileBuffer });
+                fs.unlinkSync('file.pdf');
+                res.format({
+                    json: () => {
+                        res.send(true);
+                    }
+                });
+            }
+            catch (error) {
+                res.format({
+                    json: () => {
+                        res.send(false);
+                    }
+                });
+            }
         });
     });
 });
